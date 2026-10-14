@@ -1,0 +1,101 @@
+## @section Dependencies
+## dashr-nova needs PostgreSQL, and uses Temporal and OPA when enabled.
+## Each dependency can be given directly (quick trials) or by reference to an
+## existing Secret (recommended). The chart refuses to install, with a message
+## naming the missing value, if a required dependency is not configured.
+## See README.md, "Dependencies", and examples/.
+
+database:
+  ## @param database.existingSecret Secret holding the PostgreSQL connection string (recommended)
+  existingSecret: ""
+  ## @param database.existingSecretKey Key inside existingSecret
+  existingSecretKey: DATABASE_URL
+  ## @param database.url Connection string given directly. Dev and trials only: it ends up in the release values
+  url: ""
+  ## @param database.poolMax Maximum connections per pod
+  poolMax: 5
+
+temporal:
+  ## @param temporal.enabled Use Temporal
+  enabled: true
+  ## @param temporal.address Temporal frontend as host:port (required when enabled)
+  address: ""
+  ## @param temporal.namespace Temporal namespace this app uses
+  namespace: default
+
+opa:
+  ## @param opa.enabled Use OPA for authorization decisions
+  enabled: true
+  ## @param opa.url Base URL of the OPA REST API, e.g. http://opa:8181 (required when enabled)
+  url: ""
+  ## @param opa.policyPath Decision path queried at /v1/data/<policyPath>
+  policyPath: dashr/authz/allow
+
+## @section Image
+
+image:
+  ## @param image.repository Image repository
+  repository: registry.local/dashr/dashr-nova
+  ## @param image.tag Image tag (required)
+  tag: ""
+  ## @param image.digest Optional digest (sha256:...); pins the exact build when set
+  digest: ""
+  ## @param image.pullPolicy Never when the image is loaded onto nodes; IfNotPresent with a registry
+  pullPolicy: IfNotPresent
+
+## @section Application
+
+## @param replicaCount Number of pods
+replicaCount: 1
+
+## @param env Extra plain environment variables (name: value)
+env:
+  APP_ENV: development
+
+## @param podAnnotations Extra pod annotations
+podAnnotations: {}
+
+serviceAccount:
+  ## @param serviceAccount.create Create a service account for the app
+  create: true
+  ## @param serviceAccount.name Name override
+  name: ""
+
+service:
+  ## @param service.port Service port
+  port: 80
+  ## @param service.targetPort Container port
+  targetPort: 3000
+
+istio:
+  virtualService:
+    ## @param istio.virtualService.enabled Create an Istio VirtualService
+    enabled: false
+    ## @param istio.virtualService.host Hostname
+    host: ""
+    ## @param istio.virtualService.gateway Gateway as namespace/name
+    gateway: ""
+
+migrations:
+  ## @param migrations.enabled Run a pre-install/pre-upgrade Job with the same image
+  enabled: false
+  ## @param migrations.command Migration command
+  command: ["node", "scripts/migrate.js"]
+
+## @param resources Container resources
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
+
+## @param nodeSelector Node selector
+nodeSelector: {}
+## @param tolerations Tolerations
+tolerations: []
+## @param affinity Affinity
+affinity: {}
+
+nameOverride: ""
+fullnameOverride: ""

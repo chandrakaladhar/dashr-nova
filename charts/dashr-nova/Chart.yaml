@@ -1,0 +1,6 @@
+apiVersion: v2
+name: dashr-nova
+description: DASHR Nova research dashboard (Next.js). Requires PostgreSQL; optionally Temporal and OPA.
+type: application
+version: 1.0.0        # chart version: the values contract is its public API (see CHANGELOG.md)
+appVersion: "0.1.0"   # informational; the deployed image tag is set by the deployer

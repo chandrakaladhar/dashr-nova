@@ -1,0 +1,12 @@
+# Quickest way to try the chart: everything given directly.
+# Not for shared environments: the database URL is stored in the release values.
+#   helm install dashr-nova ./charts/dashr-nova -f examples/values-minimal.yaml
+image:
+  repository: registry.local/dashr/dashr-nova
+  tag: "0.1.0"
+database:
+  url: postgresql://dashr_nova:change-me@postgres.example.svc:5432/dashr_nova
+temporal:
+  enabled: false
+opa:
+  enabled: false

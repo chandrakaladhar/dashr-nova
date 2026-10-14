@@ -1,0 +1,19 @@
+{{- if .Values.istio.virtualService.enabled }}
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ include "dashr-nova.fullname" . }}
+  labels:
+    {{- include "dashr-nova.labels" . | nindent 4 }}
+spec:
+  hosts:
+    - {{ required "istio.virtualService.host is required when the VirtualService is enabled" .Values.istio.virtualService.host | quote }}
+  gateways:
+    - {{ required "istio.virtualService.gateway (namespace/name) is required when the VirtualService is enabled" .Values.istio.virtualService.gateway }}
+  http:
+    - route:
+        - destination:
+            host: {{ include "dashr-nova.fullname" . }}
+            port:
+              number: {{ .Values.service.port }}
+{{- end }}

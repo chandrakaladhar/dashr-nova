@@ -1,0 +1,15 @@
+dashr-nova {{ .Values.image.tag | default .Chart.AppVersion }} is deployed as release {{ .Release.Name }} in {{ .Release.Namespace }}.
+
+Dependencies:
+{{ include "dashr-nova.dependencySummary" . | indent 2 }}
+
+Check that every dependency is reachable:
+  helm test {{ .Release.Name }} -n {{ .Release.Namespace }}
+{{- if .Values.istio.virtualService.enabled }}
+
+URL: http://{{ .Values.istio.virtualService.host }}
+{{- else }}
+
+Local access:
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "dashr-nova.fullname" . }} 3000:{{ .Values.service.port }}
+{{- end }}
