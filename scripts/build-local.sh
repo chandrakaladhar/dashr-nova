@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
-# Build the image, save it to ./images/, and optionally load it into a local cluster.
+# Build the image and optionally load it into a local cluster. All targets but
+# docker-desktop also save it to ./images/.
 #
-#   ./scripts/build-local.sh <version> [kind|k3d|minikube|k3s|containerd|none] [cluster-name]
+#   ./scripts/build-local.sh <version> [docker-desktop|kind|k3d|minikube|k3s|containerd|none] [cluster-name]
 #
 # Examples:
+#   ./scripts/build-local.sh 0.1.0 docker-desktop
 #   ./scripts/build-local.sh 0.1.0 kind dev
 #   ./scripts/build-local.sh 0.1.1 k3s
+#
+# docker-desktop: Docker Desktop's Kubernetes can pull images from the local
+# Docker image store, but pullPolicy Never never asks. A throwaway pod with
+# pullPolicy IfNotPresent copies the image onto the node first. [cluster-name]
+# is the kubectl context (default: docker-desktop).
 #
 # The image is tagged registry.local/dashr/dashr-nova:<version>. That name is
 # never pulled: the deployment uses pullPolicy Never, so the image must already
@@ -16,7 +23,7 @@
 # can reach the registry. It is passed as a build secret, not baked in.
 set -euo pipefail
 
-VERSION="${1:?usage: build-local.sh <version> [kind|k3d|minikube|k3s|containerd|none] [cluster-name]}"
+VERSION="${1:?usage: build-local.sh <version> [docker-desktop|kind|k3d|minikube|k3s|containerd|none] [cluster-name]}"
 TARGET="${2:-none}"
 CLUSTER="${3:-}"
 
@@ -29,16 +36,36 @@ if [ "$VERSION" = "latest" ]; then
   exit 1
 fi
 
-mkdir -p "$ROOT/images"
 SECRET_ARGS=()
 if [ -n "${CORP_CA_FILE:-}" ]; then
   SECRET_ARGS=(--secret "id=corp_ca,src=$CORP_CA_FILE")
 fi
 docker build "${SECRET_ARGS[@]+"${SECRET_ARGS[@]}"}" --build-arg APP_VERSION="$VERSION" -t "$IMAGE" "$ROOT"
-docker save -o "$TAR" "$IMAGE"
-echo "Saved $IMAGE to $TAR"
+
+# load_docker_desktop <context>: pull the image onto the node via a throwaway pod
+load_docker_desktop() {
+  local ctx="${1:-docker-desktop}" pod="imgload-$$"
+  trap 'kubectl --context "$ctx" -n default delete pod "$pod" --ignore-not-found --wait=false >/dev/null' RETURN
+  kubectl --context "$ctx" -n default run "$pod" --image="$IMAGE" \
+    --image-pull-policy=IfNotPresent --restart=Never --command -- true >/dev/null
+  # The first pull can fail while the store catches up; the kubelet retries.
+  if ! kubectl --context "$ctx" -n default wait pod "$pod" \
+      --for=jsonpath='{.status.phase}'=Succeeded --timeout=120s >/dev/null; then
+    echo "error: $IMAGE did not reach the node. Pod events:" >&2
+    kubectl --context "$ctx" -n default get events --field-selector "involvedObject.name=$pod" >&2
+    return 1
+  fi
+  echo "Loaded $IMAGE onto $ctx"
+}
+
+if [ "$TARGET" != "docker-desktop" ]; then
+  mkdir -p "$ROOT/images"
+  docker save -o "$TAR" "$IMAGE"
+  echo "Saved $IMAGE to $TAR"
+fi
 
 case "$TARGET" in
+  docker-desktop) load_docker_desktop "$CLUSTER" ;;
   kind)       kind load image-archive "$TAR" ${CLUSTER:+--name "$CLUSTER"} ;;
   k3d)        k3d image import "$TAR" ${CLUSTER:+-c "$CLUSTER"} ;;
   minikube)   minikube image load "$TAR" ${CLUSTER:+-p "$CLUSTER"} ;;
