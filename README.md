@@ -9,8 +9,10 @@ app/                       Next.js App Router
   api/health               liveness: the process is up
   api/ready                readiness: the database is reachable
   api/dependencies         status of every dependency (used by helm test)
+  api/reports              example route authorized by OPA
 lib/config.ts              the configuration contract, validated at startup
 lib/db.ts, lib/opa.ts      PostgreSQL pool, OPA decision helper
+lib/auth.ts                current user (dev stub until a login exists) + authorize()
 lib/dependencies.ts        reachability checks
 instrumentation.ts         fails the pod at startup if configuration is invalid
 charts/dashr-nova/         Helm chart with an explicit dependency contract
@@ -123,6 +125,37 @@ Build tips:
   (`NODE_EXTRA_CA_CERTS`) and is never written to an image layer.
 - **`ErrImageNeverPull`** on the pod means the tag in dashr-nova-deploy is not
   on the node yet: build or load that exact tag, then delete the pod.
+
+## Authorization (OPA)
+
+Routes ask the platform's OPA service for each decision; the rules live in
+dashr-platform-gitops (`platform/opa/policies/dashr-authz.rego`), so changing
+who may do what is a policy commit, not an app release.
+
+```ts
+import { authorize, getCurrentUser } from "@/lib/auth";
+
+export async function GET(request: Request) {
+  const denied = await authorize(getCurrentUser(request), "read", "reports");
+  if (denied) return denied;          // 401 not signed in, 403 denied
+  // ...
+}
+```
+
+OPA receives `{"input": {"user": {"id", "roles"}, "action", "resource"}}`.
+Any OPA error denies (fail closed).
+
+There is no login yet. Until there is, `getCurrentUser` accepts roles from an
+`x-dev-roles` header **only when `APP_ENV` is `local` or `development`**; in
+staging and production it returns null and protected routes answer 401.
+Replace it with the real session (OIDC) before relying on it.
+
+```bash
+curl -H "Host: dashr-nova.dashr.local" localhost/api/reports                                  # 401
+curl -H "Host: dashr-nova.dashr.local" -H "x-dev-roles: researcher" localhost/api/reports     # 200
+curl -X DELETE -H "Host: dashr-nova.dashr.local" -H "x-dev-roles: researcher" localhost/api/reports      # 403
+curl -X DELETE -H "Host: dashr-nova.dashr.local" -H "x-dev-roles: platform-admin" localhost/api/reports  # 204
+```
 
 ## Database schema
 
