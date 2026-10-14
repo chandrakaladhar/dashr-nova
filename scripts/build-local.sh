@@ -11,6 +11,9 @@
 # never pulled: the deployment uses pullPolicy Never, so the image must already
 # be on the node. Use a new version for every build; Kubernetes won't restart
 # pods for a tag it has already deployed.
+#
+# Behind a TLS-inspecting proxy, set CORP_CA_FILE to its root CA (PEM) so npm
+# can reach the registry. It is passed as a build secret, not baked in.
 set -euo pipefail
 
 VERSION="${1:?usage: build-local.sh <version> [kind|k3d|minikube|k3s|containerd|none] [cluster-name]}"
@@ -27,7 +30,11 @@ if [ "$VERSION" = "latest" ]; then
 fi
 
 mkdir -p "$ROOT/images"
-docker build --build-arg APP_VERSION="$VERSION" -t "$IMAGE" "$ROOT"
+SECRET_ARGS=()
+if [ -n "${CORP_CA_FILE:-}" ]; then
+  SECRET_ARGS=(--secret "id=corp_ca,src=$CORP_CA_FILE")
+fi
+docker build "${SECRET_ARGS[@]+"${SECRET_ARGS[@]}"}" --build-arg APP_VERSION="$VERSION" -t "$IMAGE" "$ROOT"
 docker save -o "$TAR" "$IMAGE"
 echo "Saved $IMAGE to $TAR"
 
