@@ -17,7 +17,10 @@ configured, `helm install` stops with a message naming the value to set.
 (see `migrations`). The connection string may go through PgBouncer in
 transaction mode, so the app avoids session-level features.
 
-**Temporal.** The namespace given must exist on the Temporal server.
+**Temporal.** The namespace given must exist on the Temporal server. Temporal
+chart 1.x no longer creates `default`; the DASHR platform creates it through
+`server.config.namespaces`. Check with
+`temporal operator namespace list --address <temporal.address>`.
 
 **OPA.** The app queries `POST <opa.url>/v1/data/<opa.policyPath>` with
 `{"input": {...}}` and treats anything other than `result: true` as deny.
@@ -28,6 +31,10 @@ Examples: `examples/values-minimal.yaml` (trial, everything inline),
 
 After installing, `helm test <release>` checks that every enabled dependency
 is reachable from inside the cluster.
+
+**Images loaded onto nodes** (local clusters): set `image.pullPolicy: Never`
+and use a new `image.tag` for every build. `ErrImageNeverPull` means that tag
+is not on the node yet (see `scripts/build-local.sh` in the app repo).
 
 ## Values
 
