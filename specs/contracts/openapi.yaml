@@ -1,0 +1,217 @@
+openapi: 3.1.0
+info:
+  title: DASHR Nova API
+  version: 0.1.0
+  description: |
+    HTTP API of dashr-nova. Behavior is specified in specs/capabilities; each
+    operation names the requirements it implements (x-requirements).
+    Changes are additive only (constitution X).
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: projects
+    description: Research projects (specs/capabilities/project-creation)
+  - name: reports
+    description: Sample authorized route (specs/capabilities/access-control)
+  - name: operations
+    description: Health and readiness for the platform (specs/capabilities/operations)
+
+components:
+  securitySchemes:
+    devRoles:
+      type: apiKey
+      in: header
+      name: x-dev-roles
+      description: Comma-separated roles. Development environments only (REQ-AUTHZ-002); ignored elsewhere.
+    devUser:
+      type: apiKey
+      in: header
+      name: x-dev-user
+      description: User ID for the development identity (default dev-user).
+
+  schemas:
+    Error:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          description: Machine-readable code
+          enum: [invalid_request, unauthenticated, forbidden, not_found, name_taken, policy_violation, unavailable, internal]
+        message: { type: string }
+        details:
+          description: invalid_request → field errors; policy_violation → every violated rule
+          oneOf:
+            - type: array
+              items: { $ref: "#/components/schemas/Violation" }
+            - type: object
+              properties:
+                formErrors: { type: array, items: { type: string } }
+                fieldErrors: { type: object, additionalProperties: { type: array, items: { type: string } } }
+    Violation:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string, description: "Policy rule ID, e.g. PRJ-ETHICS-REQUIRED" }
+        field: { type: string }
+        message: { type: string }
+    CreateProjectRequest:
+      type: object
+      required: [name, dataClassification, members]
+      properties:
+        name: { type: string, minLength: 3, maxLength: 120 }
+        description: { type: string, maxLength: 2000 }
+        dataClassification: { type: string, enum: [public, internal, sensitive] }
+        ethicsApprovalId: { type: string, minLength: 1 }
+        members:
+          type: array
+          minItems: 1
+          description: Each userId at most once.
+          items:
+            type: object
+            required: [userId, role]
+            properties:
+              userId: { type: string, minLength: 1 }
+              role: { type: string, enum: [lead, member] }
+        services:
+          type: array
+          uniqueItems: true
+          default: []
+          items: { type: string, enum: [rds, ais, asteria, redcap, apollo] }
+    CreatedProject:
+      type: object
+      required: [id, status]
+      properties:
+        id: { type: string, format: uuid }
+        status: { type: string, const: pending }
+    DependencyStatus:
+      type: string
+      enum: [ok, disabled, unreachable]
+
+  responses:
+    Unauthenticated:
+      description: No signed-in user
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Forbidden:
+      description: Not allowed by policy
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Unavailable:
+      description: The policy service (or another dependency) gave no answer; nothing was done
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+
+paths:
+  /api/projects:
+    post:
+      tags: [projects]
+      summary: Create a project and start provisioning it
+      operationId: createProject
+      x-requirements: [REQ-PRJ-001, REQ-PRJ-002, REQ-PRJ-003, REQ-PRJ-004, REQ-PRJ-005, REQ-PRJ-006, REQ-PRJ-007, REQ-PRJ-008, REQ-PRJ-009]
+      security: [{ devRoles: [], devUser: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateProjectRequest" }
+      responses:
+        "202":
+          description: Accepted; provisioning runs in the background
+          content: { application/json: { schema: { $ref: "#/components/schemas/CreatedProject" } } }
+        "400":
+          description: Malformed request, or a selected service's dependency is missing
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409":
+          description: Name already taken (case-insensitive)
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "422":
+          description: Breaks one or more project policies; details lists every violation
+          content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        "503": { $ref: "#/components/responses/Unavailable" }
+
+  /api/reports:
+    get:
+      tags: [reports]
+      summary: List reports (sample data)
+      operationId: listReports
+      x-requirements: [REQ-AUTHZ-004]
+      security: [{ devRoles: [] }]
+      responses:
+        "200":
+          description: Reports
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reports:
+                    type: array
+                    items: { type: object, properties: { id: { type: string }, title: { type: string } } }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    delete:
+      tags: [reports]
+      summary: Delete reports (sample)
+      operationId: deleteReports
+      x-requirements: [REQ-AUTHZ-004]
+      security: [{ devRoles: [] }]
+      responses:
+        "204": { description: Deleted }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/health:
+    get:
+      tags: [operations]
+      summary: Liveness
+      operationId: health
+      security: []
+      x-requirements: [REQ-OPS-002]
+      responses:
+        "200":
+          description: The process is up
+          content: { application/json: { schema: { type: object, properties: { status: { const: ok } } } } }
+
+  /api/ready:
+    get:
+      tags: [operations]
+      summary: Readiness (database only)
+      operationId: ready
+      security: []
+      x-requirements: [REQ-OPS-003]
+      responses:
+        "200":
+          description: Ready
+          content: &readyBody
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, enum: [ready, not-ready] }
+                  database: { $ref: "#/components/schemas/DependencyStatus" }
+        "503":
+          description: Database unreachable
+          content: *readyBody
+
+  /api/dependencies:
+    get:
+      tags: [operations]
+      summary: Status of every configured dependency
+      operationId: dependencies
+      security: []
+      x-requirements: [REQ-OPS-004]
+      responses:
+        "200":
+          description: Every enabled dependency reachable
+          content: &depsBody
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  database: { $ref: "#/components/schemas/DependencyStatus" }
+                  temporal: { $ref: "#/components/schemas/DependencyStatus" }
+                  opa: { $ref: "#/components/schemas/DependencyStatus" }
+        "503":
+          description: An enabled dependency is unreachable
+          content: *depsBody

@@ -1,7 +1,7 @@
 import { authorize, getCurrentUser } from "@/lib/auth";
 
-// Example of a route protected by OPA. The decision comes from the policy in
-// dashr-platform-gitops (platform/opa/policies/dashr-authz.rego): researchers
+// Example of a route protected by OPA. The decision comes from package
+// dashr/authz in dashr-nova-policies (policy/dashr/authz/authz.rego): researchers
 // may read, platform admins may do anything. Replace the sample data with the
 // real query.
 export const dynamic = "force-dynamic";

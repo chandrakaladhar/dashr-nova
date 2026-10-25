@@ -19,6 +19,12 @@ jobs:
       - name: Install dependencies
         run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
+      - name: Specs (structure, IDs, traceability)
+        run: npm run spec:check
+
+      - name: OpenAPI contract
+        run: npm run spec:api
+
       - name: Type-check
         run: npm run typecheck
 

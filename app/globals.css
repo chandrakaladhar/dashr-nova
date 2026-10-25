@@ -26,3 +26,77 @@ h1 { font-size: 2.5rem; margin: 0 0 0.5rem; letter-spacing: -0.01em; }
 .good { color: var(--good); }
 .warn { color: var(--warn); }
 .facts .row { display: contents; }
+
+/* --- projects -------------------------------------------------------------- */
+:root { --line: #d5dde2; --bad: #b3261e; --busy: #1f5fa8; --field: #ffffff; }
+@media (prefers-color-scheme: dark) {
+  :root { --line: #2c3c46; --bad: #ff8a80; --busy: #8ab8f0; --field: #1b2a33; }
+}
+a { color: var(--busy); }
+h2 { font-size: 1.15rem; margin: 2.5rem 0 0.75rem; }
+code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.85em; }
+.shell.wide { max-width: 56rem; }
+.muted { color: var(--muted); }
+.note { margin-top: 2.5rem; font-size: 0.9rem; }
+.crumbs { margin: 0 0 0.5rem; font-size: 0.95rem; }
+.heading { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: space-between; }
+.heading h1 { margin: 0.25rem 0; overflow-wrap: anywhere; }
+
+button, .button {
+  font: inherit; font-weight: 600; cursor: pointer; text-decoration: none;
+  background: var(--ink); color: var(--paper); border: 0; border-radius: 6px; padding: 0.5rem 1rem;
+}
+button:disabled { opacity: 0.6; cursor: progress; }
+button.small { font-size: 0.85rem; padding: 0.25rem 0.6rem; }
+input, select, textarea {
+  font: inherit; color: var(--ink); background: var(--field);
+  border: 1px solid var(--line); border-radius: 6px; padding: 0.45rem 0.6rem; width: 100%;
+}
+input[type="checkbox"] { width: auto; }
+
+.identity {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem;
+  border: 1px dashed var(--line); border-radius: 8px; padding: 0.5rem 0.75rem; margin-bottom: 2rem; font-size: 0.9rem;
+}
+.identity label { display: flex; align-items: center; gap: 0.4rem; }
+.identity input { width: auto; padding: 0.25rem 0.4rem; }
+.identity button { padding: 0.3rem 0.8rem; }
+.tag { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--warn); font-weight: 700; }
+
+.form { display: grid; gap: 1.1rem; }
+.form label { display: grid; gap: 0.3rem; font-weight: 600; }
+.form label .muted { font-weight: 400; }
+.form fieldset { border: 1px solid var(--line); border-radius: 6px; padding: 0.5rem 0.9rem 0.8rem; margin: 0; }
+.form legend { font-weight: 600; padding: 0 0.3rem; }
+.checks { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; }
+.form .check { display: flex; align-items: center; gap: 0.4rem; font-weight: 400; }
+.form button { justify-self: start; }
+.field-error { color: var(--bad); font-size: 0.9rem; font-weight: 400; }
+.alert { border-left: 4px solid var(--bad); background: color-mix(in srgb, var(--bad) 8%, transparent); padding: 0.75rem 1rem; border-radius: 4px; }
+.alert ul { margin: 0.5rem 0 0; padding-left: 1.2rem; }
+
+.badge {
+  display: inline-block; font-size: 0.8rem; font-weight: 700; padding: 0.1rem 0.55rem; border-radius: 999px;
+  border: 1px solid currentColor; white-space: nowrap; text-transform: capitalize;
+}
+.badge.good { color: var(--good); }
+.badge.bad { color: var(--bad); }
+.badge.warn { color: var(--warn); }
+.badge.busy { color: var(--busy); }
+.badge.idle { color: var(--muted); }
+
+.list { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.list th { text-align: left; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--line); padding: 0.4rem 0.5rem; }
+.list td { border-bottom: 1px solid var(--line); padding: 0.55rem 0.5rem; vertical-align: middle; }
+
+.stages { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; counter-reset: stage; }
+.stages > li { border: 1px solid var(--line); border-radius: 8px; padding: 0.75rem 1rem; counter-increment: stage; }
+.stage-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.4rem; }
+.stage-title::before { content: "Stage " counter(stage) " · "; }
+.step { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.75rem; padding: 0.3rem 0; }
+.step > span:first-child { min-width: 7rem; font-weight: 600; }
+
+@media (max-width: 40rem) {
+  .list th:nth-child(4), .list td:nth-child(4) { display: none; }
+  .step code { flex-basis: 100%; overflow-wrap: anywhere; }
+}

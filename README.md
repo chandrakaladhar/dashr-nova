@@ -4,21 +4,40 @@ Source for the DASHR Nova Next.js application, its container image, and its
 Helm chart. Deployment configuration lives in **dashr-nova-deploy**; the
 cluster, shared services and secrets live in **dashr-platform-gitops**.
 
+**This repo is spec-driven**: behavior is specified in [`specs/`](specs/README.md)
+before it is built. Start with `specs/README.md`, `specs/constitution.md` and
+`AGENTS.md`; `npm run spec:check` validates the specs.
+
 ```
-app/                       Next.js App Router
+specs/                     capabilities (what the app does), changes in flight,
+                           decisions (ADRs), contracts (OpenAPI), templates
+app/                       Next.js App Router: pages, server actions, API routes
   api/health               liveness: the process is up
   api/ready                readiness: the database is reachable
   api/dependencies         status of every dependency (used by helm test)
+  api/projects             create a project (202; provisioning runs in the background)
   api/reports              example route authorized by OPA
-lib/config.ts              the configuration contract, validated at startup
-lib/db.ts, lib/opa.ts      PostgreSQL pool, OPA decision helper
-lib/auth.ts                current user (dev stub until a login exists) + authorize()
-lib/dependencies.ts        reachability checks
+  projects/                project list, new project form, project status page
+lib/                       domain layer: every entry point goes through it
+  config.ts                the configuration contract, validated at startup
+  projects.ts              create/read projects: validation, OPA, transaction, outbox
+  auth.ts, session.ts      current user (dev stub until a login exists)
+  policy.ts, opa.ts        OPA decisions (fail closed)
+  outbox.ts                transactional outbox for starting workflows
+  provisioning/            service catalog and the provisioner contract (TypeScript side)
+  temporal/                Temporal client and names shared with workflows
+orchestrator/              the orchestrator worker process (npm run worker)
+  worker.ts                entry point: registers workflows and activities, runs the outbox sweeper
+  workflows/               project provisioning workflow (deterministic sandbox)
+  activities/              the workflow's DB/OPA steps
+db/migrations/             SQL schema
 instrumentation.ts         fails the pod at startup if configuration is invalid
 charts/dashr-nova/         Helm chart with an explicit dependency contract
-scripts/build-local.sh     build the image and load it into a local cluster
+scripts/                   build-local.sh, spec-check.mjs
 .env.example               template for .env.local (npm run dev outside Kubernetes)
 ```
+
+Every file, what it is for and which process runs it: [`CATALOG.md`](CATALOG.md).
 
 ## Configuration contract
 
