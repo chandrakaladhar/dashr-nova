@@ -48,9 +48,9 @@ image:
 ## @param replicaCount Number of pods
 replicaCount: 1
 
-## @param env Extra plain environment variables (name: value)
-env:
-  APP_ENV: development
+## @param env Plain environment variables (name: value). APP_ENV is required:
+## local and development accept development identities, nothing else does.
+env: {}
 
 ## @param podAnnotations Extra pod annotations
 podAnnotations: {}

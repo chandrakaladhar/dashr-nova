@@ -79,8 +79,10 @@ none of these files are used: the chart sets the environment.
 - `TEMPORAL_ENABLED` and `OPA_ENABLED` **default to `true`**, which makes
   `TEMPORAL_ADDRESS` and `OPA_URL` required. The example sets both to `false`
   so the app starts with only a database.
-- `APP_ENV`, `DB_POOL_MAX`, `TEMPORAL_NAMESPACE` (`default`) and
-  `OPA_POLICY_PATH` have defaults and can be left out.
+- `APP_ENV` is **required** (`local`, `development`, `staging`, `production`).
+  Only `local` and `development` accept development identities.
+- `DB_POOL_MAX`, `TEMPORAL_NAMESPACE` (`default`) and `OPA_POLICY_PATH` have
+  defaults and can be left out.
 - If startup fails, the error lists every invalid variable at once.
 
 **Against the local cluster's services.** Port-forward them (one per terminal)

@@ -135,6 +135,7 @@ The source of truth for behaviour. See `specs/README.md` for the workflow.
 | `specs/capabilities/<name>/spec.md` | Current behaviour, as numbered requirements: `project-creation` (REQ-PRJ), `project-provisioning` (REQ-PROV), `access-control` (REQ-AUTHZ), `operations` (REQ-OPS). |
 | `specs/changes/NNNN-<slug>/` | A change in progress: `proposal.md`, `spec-delta.md`, `design.md`, `tasks.md`. |
 | `specs/changes/0001-workflow-run-tracking/` | Proposed: record every workflow run, and reconcile stuck ones. |
+| `specs/changes/0002-require-app-env/` | In progress: `APP_ENV` is required, so development identities are never on by default. |
 | `specs/archive/` | Finished changes, moved here by `/spec-archive`. |
 | `specs/decisions/NNNN-*.md` | Architecture decision records (ADRs 0001–0006). |
 | `specs/contracts/openapi.yaml` | The HTTP API contract, with `x-requirements` linking operations to requirements. |

@@ -11,7 +11,11 @@ const flag = z.enum(["true", "false"]).default("true").transform((v) => v === "t
 
 const schema = z
   .object({
-    APP_ENV: z.string().default("development"),
+    // No default: development identities depend on it (REQ-AUTHZ-002).
+    APP_ENV: z
+      .string({ required_error: "APP_ENV is required, e.g. local, development, staging, production (chart: env.APP_ENV)" })
+      .trim()
+      .min(1, "APP_ENV is empty"),
     APP_VERSION: z.string().default("dev"),
 
     DATABASE_URL: z

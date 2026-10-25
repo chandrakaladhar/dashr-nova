@@ -55,7 +55,7 @@ is not on the node yet (see `scripts/build-local.sh` in the app repo).
 | `image.digest` | `""` | Optional `sha256:` digest |
 | `image.pullPolicy` | `IfNotPresent` | `Never` when images are loaded onto nodes |
 | `replicaCount` | `1` | Pods |
-| `env` | `{APP_ENV: development}` | Extra plain environment variables |
+| `env` | `{}` | Plain environment variables. `env.APP_ENV` is required |
 | `istio.virtualService.enabled` | `false` | Create an Istio VirtualService |
 | `istio.virtualService.host` | `""` | Hostname |
 | `istio.virtualService.gateway` | `""` | Gateway, `namespace/name` |
