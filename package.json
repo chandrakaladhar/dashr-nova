@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "worker": "tsx orchestrator/worker.ts",
+    "worker": "tsx src/orchestrator/worker.ts",
     "spec:check": "node scripts/spec-check.mjs",
     "spec:api": "npx -y @redocly/cli@2.64.0 lint --config specs/contracts/redocly.yaml specs/contracts/openapi.yaml"
   },

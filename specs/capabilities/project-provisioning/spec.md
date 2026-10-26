@@ -2,7 +2,7 @@
 
 - **Prefix:** REQ-PROV
 - **Owner:** dashr-nova (orchestration); each provisioner team owns how its service is provisioned
-- **Code:** `orchestrator/workflows/project-provisioning.ts`, `orchestrator/activities/`, `lib/provisioning/catalog.ts`, `app/projects/[id]/`
+- **Code:** `src/orchestrator/workflows/project-provisioning.ts`, `src/orchestrator/activities/`, `src/lib/provisioning/catalog.ts`, `src/app/projects/[id]/`
 
 Turning an accepted project into working access: access groups first, then
 every selected service, then keeping access in step as blocked members become

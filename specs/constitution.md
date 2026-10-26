@@ -16,7 +16,7 @@ at runtime and knows nothing about where its dependencies run. No
 
 ## III. Every entry point goes through the domain layer
 Pages, server actions, API routes and workflow activities call the same domain
-functions in `lib/`. Validation and authorization live there, never only in
+functions in `src/lib/`. Validation and authorization live there, never only in
 an entry point.
 
 ## IV. Authorization is decided by OPA and fails closed

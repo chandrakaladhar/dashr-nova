@@ -2,7 +2,7 @@
 
 - **Prefix:** REQ-AUTHZ
 - **Owner:** dashr-nova (enforcement); rules in dashr-nova-policies
-- **Code:** `lib/auth.ts`, `lib/session.ts`, `lib/context.ts`, `lib/policy.ts`, `lib/opa.ts`
+- **Code:** `src/lib/auth.ts`, `src/lib/session.ts`, `src/lib/context.ts`, `src/lib/policy.ts`, `src/lib/opa.ts`
 
 Who is calling, and whether they may do what they ask. Identity is a
 development stub until a real login exists; decisions come from OPA.

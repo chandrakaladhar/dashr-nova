@@ -12,7 +12,7 @@ import { join, relative } from "node:path";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 const SPECS = join(ROOT, "specs");
-const CODE_DIRS = ["app", "lib", "orchestrator", "tests"];
+const CODE_DIRS = ["src", "tests"];
 const ID = /REQ-[A-Z]+-\d{3}/g;
 
 const errors = [];

@@ -1,8 +1,8 @@
 # Design: 0002 Require the environment name
 
 ## Approach
-- `lib/config.ts`: `APP_ENV` is a required, non-empty string with no default.
-  `instrumentation.ts` already validates configuration at startup and exits
+- `src/lib/config.ts`: `APP_ENV` is a required, non-empty string with no default.
+  `src/instrumentation.ts` already validates configuration at startup and exits
   on error, and the worker calls `getConfig()` first, so both stop at once.
 - Chart: `values.yaml` sets `env: {}`; the `dashr-nova.env` helper uses
   `required` on `env.APP_ENV`, so `helm template` and `helm install` fail

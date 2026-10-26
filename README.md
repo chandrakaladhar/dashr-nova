@@ -11,27 +11,29 @@ before it is built. Start with `specs/README.md`, `specs/constitution.md` and
 ```
 specs/                     capabilities (what the app does), changes in flight,
                            decisions (ADRs), contracts (OpenAPI), templates
-app/                       Next.js App Router: pages, server actions, API routes
-  api/health               liveness: the process is up
-  api/ready                readiness: the database is reachable
-  api/dependencies         status of every dependency (used by helm test)
-  api/projects             create a project (202; provisioning runs in the background)
-  api/reports              example route authorized by OPA
-  projects/                project list, new project form, project status page
-lib/                       domain layer: every entry point goes through it
-  config.ts                the configuration contract, validated at startup
-  projects.ts              create/read projects: validation, OPA, transaction, outbox
-  auth.ts, session.ts      current user (dev stub until a login exists)
-  policy.ts, opa.ts        OPA decisions (fail closed)
-  outbox.ts                transactional outbox for starting workflows
-  provisioning/            service catalog and the provisioner contract (TypeScript side)
-  temporal/                Temporal client and names shared with workflows
-orchestrator/              the orchestrator worker process (npm run worker)
-  worker.ts                entry point: registers workflows and activities, runs the outbox sweeper
-  workflows/               project provisioning workflow (deterministic sandbox)
-  activities/              the workflow's DB/OPA steps
+src/                       all application code (imported as @/...)
+  app/                     Next.js App Router: pages, server actions, API routes
+    api/health             liveness: the process is up
+    api/ready              readiness: the database is reachable
+    api/dependencies       status of every dependency (used by helm test)
+    api/projects           create a project (202; provisioning runs in the background)
+    api/reports            example route authorized by OPA
+    projects/              project list, new project form, project status page
+  lib/                     domain layer: every entry point goes through it
+    config.ts              the configuration contract, validated at startup
+    projects.ts            create/read projects: validation, OPA, transaction, outbox
+    auth.ts, session.ts    current user (dev stub until a login exists)
+    policy.ts, opa.ts      OPA decisions (fail closed)
+    outbox.ts              transactional outbox for starting workflows
+    provisioning/          service catalog and the provisioner contract (TypeScript side)
+    temporal/              Temporal client and names shared with workflows
+  orchestrator/            the orchestrator worker process (npm run worker)
+    worker.ts              entry point: registers workflows and activities, runs the outbox sweeper
+    workflows/             project provisioning workflow (deterministic sandbox)
+    activities/            the workflow's DB/OPA steps
+  instrumentation.ts       fails the pod at startup if configuration is invalid
 db/migrations/             SQL schema
-instrumentation.ts         fails the pod at startup if configuration is invalid
+public/                    static files (Next.js serves them from the top level)
 charts/dashr-nova/         Helm chart with an explicit dependency contract
 scripts/                   build-local.sh, spec-check.mjs
 .env.example               template for .env.local (npm run dev outside Kubernetes)
@@ -56,7 +58,7 @@ different audience:
 
 1. **Install time**: `values.schema.json` and the chart's `fail`/`required`
    messages stop `helm install` (or the Flux HelmRelease) and name the value to set.
-2. **Startup**: `instrumentation.ts` validates the environment and exits with
+2. **Startup**: `src/instrumentation.ts` validates the environment and exits with
    a list of every problem, before the pod takes traffic.
 3. **After deploy**: `helm test <release>` checks each dependency is reachable.
 
@@ -72,7 +74,7 @@ cp .env.example .env.local     # point DATABASE_URL at a local Postgres
 npm run dev
 ```
 
-`.env.example` is committed documentation of the variables `lib/config.ts`
+`.env.example` is committed documentation of the variables `src/lib/config.ts`
 reads; `.env.local` holds your real values and is git-ignored. In Kubernetes
 none of these files are used: the chart sets the environment.
 

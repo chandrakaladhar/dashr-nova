@@ -39,7 +39,7 @@ helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" }}
 {{- end -}}
 
 {{/*
-Dependency contract -> environment variables read by lib/config.ts.
+Dependency contract -> environment variables read by src/lib/config.ts.
 Fails the install with a message saying what to set if a dependency is missing.
 */}}
 {{- define "dashr-nova.dependencyEnv" -}}
