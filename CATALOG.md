@@ -16,6 +16,7 @@ adds, removes or repurposes a file updates this catalog in the same change.
 |---|---|---|
 | `README.md` | — | How to run, configure and deploy the app. Start here. |
 | `CATALOG.md` | — | This file. |
+| `docs/development.md` | — | Guide for new developers: setup, running the app, making a change, the AI tools, troubleshooting. |
 | `AGENTS.md` | — | Rules for AI agents (and humans) working in the repo: the spec workflow, layering, conventions. |
 | `CLAUDE.md` | — | Imports `AGENTS.md` so Claude Code reads it. |
 | `package.json` | build | Dependencies and npm scripts (`dev`, `build`, `worker`, `typecheck`, `spec:check`, `spec:api`). |

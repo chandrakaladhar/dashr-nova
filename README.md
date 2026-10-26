@@ -8,6 +8,9 @@ cluster, shared services and secrets live in **dashr-platform-gitops**.
 before it is built. Start with `specs/README.md`, `specs/constitution.md` and
 `AGENTS.md`; `npm run spec:check` validates the specs.
 
+**New here?** Start with [`docs/development.md`](docs/development.md): setup,
+running the app, how to make a change, and the AI tools.
+
 ```
 specs/                     capabilities (what the app does), changes in flight,
                            decisions (ADRs), contracts (OpenAPI), templates
