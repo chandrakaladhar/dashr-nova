@@ -37,8 +37,8 @@ Each step stops for human review before the next.
 
 ## Where things are
 Full per-file map: `CATALOG.md`.
-- `lib/`: domain functions; every entry point goes through them (ADR 0003)
-- `app/`: pages, server actions, API routes (thin adapters)
-- `orchestrator/`: the worker process: `worker.ts`, `workflows/`, `activities/` (ADR 0005)
+- `src/lib/`: domain functions; every entry point goes through them (ADR 0003)
+- `src/app/`: pages, server actions, API routes (thin adapters)
+- `src/orchestrator/`: the worker process: `worker.ts`, `workflows/`, `activities/` (ADR 0005)
 - `db/migrations/`: schema
 - `specs/`: capabilities, changes, decisions, contracts, templates

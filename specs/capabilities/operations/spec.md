@@ -2,7 +2,7 @@
 
 - **Prefix:** REQ-OPS
 - **Owner:** dashr-nova
-- **Code:** `instrumentation.ts`, `lib/config.ts`, `app/api/health`, `app/api/ready`, `app/api/dependencies`, `orchestrator/worker.ts`
+- **Code:** `src/instrumentation.ts`, `src/lib/config.ts`, `src/app/api/health`, `src/app/api/ready`, `src/app/api/dependencies`, `src/orchestrator/worker.ts`
 
 How the application behaves for the platform that runs it: startup,
 health, and background housekeeping.

@@ -2,7 +2,7 @@
 
 - **Prefix:** REQ-PRJ
 - **Owner:** dashr-nova
-- **Code:** `lib/projects.ts` (`createProject`), `app/api/projects/route.ts`, `app/projects/new/`
+- **Code:** `src/lib/projects.ts` (`createProject`), `src/app/api/projects/route.ts`, `src/app/projects/new/`
 
 Accepting a request for a new research project: validating it, deciding
 whether it is allowed, recording it, and handing it to provisioning. Ends when

@@ -4,7 +4,7 @@
 The orchestrator records runs; nothing else does. Recording is built into the
 two places every run passes through, so no step can skip it:
 
-- `child()` in `orchestrator/workflows/project-provisioning.ts`: record start (activity),
+- `child()` in `src/orchestrator/workflows/project-provisioning.ts`: record start (activity),
   `executeChild`, record end. The parent always learns a child's outcome,
   including termination and timeout (`ChildWorkflowFailure` with a
   `TerminatedFailure` / `TimeoutFailure` cause), so children never need the
@@ -59,7 +59,7 @@ create index workflow_runs_project on workflow_runs (project_id, started_at desc
 ```
 
 ## Flows
-- Activities: `recordRunStarted`, `recordRunEnded` (in `orchestrator/activities/`).
+- Activities: `recordRunStarted`, `recordRunEnded` (in `src/orchestrator/activities/`).
 - `statusOf(err)`: `CancelledFailure` → cancelled, `TerminatedFailure` → terminated, `TimeoutFailure` → timed_out, else failed.
 - `reconcileRuns` workflow on `dashr-nova-orchestration`, registered by the worker, scheduled at worker start via `client.schedule.create` (idempotent ID `reconcile-runs`, every 5 minutes, overlap policy SKIP). Activities: `listStaleRuns(olderThan)`, `describeWorkflow(id)` (Temporal client), `closeRun(id, outcome, endedAt, 'reconciler')`.
 
