@@ -174,6 +174,86 @@ Useful habits:
   `.claude/settings.json`, which everyone shares. Claude Code adds the local
   file to your global git ignore; check with `git check-ignore -v .claude/settings.local.json`.
 
+### Example prompts
+
+A good prompt says **what** you want, **where** it goes, the **limits** (no new
+dependencies, no behavior change), and **how to check** it. The examples
+below are real changes to this repo. Change numbers like `0003` are
+whatever number `/spec-propose` gives the change.
+
+**1. Restyle a page (frontend-design, no spec needed).** The look changes,
+the behavior doesn't, so this goes straight to code.
+
+```text
+Use the frontend-design skill to redesign the projects list page
+(src/app/projects/page.tsx and its styles in src/app/globals.css).
+It should feel like a calm research tool: clear hierarchy, readable status
+badges, a prominent "New project" action, and a useful empty state.
+Keep the same data, links and server rendering. Plain CSS only, no new
+dependencies. When done, open /projects with playwright at desktop and
+phone width, in light and dark mode, and show me screenshots.
+```
+
+Asking for Tailwind or shadcn/ui here would be a lasting decision: ask for an
+ADR first ("write an ADR for adopting shadcn/ui and Tailwind v4, then stop").
+
+**2. Add an API endpoint (spec workflow).** Other systems will see it, so it
+starts with a proposal. Run one step at a time and review each result.
+
+```text
+/spec-propose a JSON endpoint GET /api/projects/{id} that returns the same
+project detail the /projects/[id] page shows (status, entitlements, services,
+members), with the same access rules as the page. Unknown id is 404.
+```
+
+After you approve the proposal:
+
+```text
+/spec-design 0003
+```
+
+Check that the design reuses `getProject` in `src/lib/projects.ts`, keeps the
+route thin, and adds the path to `specs/contracts/openapi.yaml`. Then:
+
+```text
+/spec-tasks 0003
+```
+
+```text
+/spec-implement 0003. Follow the pattern of src/app/api/projects/route.ts:
+parse, call src/lib, map errors with errorResponse. Tag the tests with the
+requirement IDs. Run spec:check, spec:api and typecheck, then try the
+endpoint with curl using x-dev-user and x-dev-roles headers, including a 404
+and a 403.
+```
+
+**3. Build a new page (spec workflow, then frontend-design).** A page users
+can see is behavior, so it also starts with a proposal.
+
+```text
+/spec-propose a members page at /projects/[id]/members: a table of each
+member with role, eligibility status and the reasons when not eligible,
+visible to anyone who can see the project. Linked from the project page.
+```
+
+Then `/spec-design 0004` and `/spec-tasks 0004` as above, and:
+
+```text
+/spec-implement 0004. Read the data through src/lib (add a domain function
+if getProject is not enough; no SQL in src/app). Use the frontend-design
+skill for the layout, matching the existing project page. Then with
+playwright: sign in as a researcher with the dev identity switcher, open a
+project's members page, and screenshot it at desktop and phone width.
+```
+
+**Getting a better result:**
+
+- Point at an existing file to copy ("follow the pattern of …"). This repo
+  already has one of everything: a page, a form, a route, a domain function.
+- Say what you will check, and it will check that too.
+- If the answer is wrong, say what is wrong ("the route has SQL in it; move it
+  to src/lib") rather than asking it to try again.
+
 ### Codex
 
 Start it in the repo folder: `codex`. It reads `AGENTS.md`, finds the spec
