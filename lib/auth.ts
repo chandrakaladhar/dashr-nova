@@ -19,11 +19,22 @@ const DEV_ENVS = new Set(["local", "development"]);
  * returns null, so protected routes answer 401.
  */
 export function getCurrentUser(request: Request): User | null {
-  if (!DEV_ENVS.has(getConfig().APP_ENV)) return null;
-  const header = request.headers.get("x-dev-roles");
-  if (!header) return null;
-  const roles = header.split(",").map((r) => r.trim()).filter(Boolean);
-  return { id: "dev-user", roles };
+  return devUser(request.headers.get("x-dev-roles"), request.headers.get("x-dev-user"));
+}
+
+/** True where a dev identity is accepted (local, development). */
+export function devIdentityAllowed(): boolean {
+  return DEV_ENVS.has(getConfig().APP_ENV);
+}
+
+/**
+ * A dev identity from comma-separated roles (header for API calls, cookie
+ * for pages; see lib/session.ts). Null outside DEV_ENVS or without roles.
+ */
+export function devUser(roles: string | null | undefined, id?: string | null): User | null {
+  if (!devIdentityAllowed() || !roles) return null;
+  const list = roles.split(",").map((r) => r.trim()).filter(Boolean);
+  return list.length ? { id: id?.trim() || "dev-user", roles: list } : null;
 }
 
 /**

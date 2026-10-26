@@ -77,6 +77,7 @@ Fails the install with a message saying what to set if a dependency is missing.
 {{- end -}}
 
 {{- define "dashr-nova.env" -}}
+{{- $_ := required "\n\nenv.APP_ENV is required (local, development, staging, production...).\nOnly local and development accept development identities. The deploy repo overlay normally sets it." .Values.env.APP_ENV }}
 {{- range $k, $v := .Values.env }}
 - name: {{ $k }}
   value: {{ $v | quote }}

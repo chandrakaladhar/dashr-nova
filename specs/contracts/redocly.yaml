@@ -1,0 +1,7 @@
+# npx @redocly/cli lint --config specs/contracts/redocly.yaml specs/contracts/openapi.yaml
+extends:
+  - recommended
+rules:
+  info-license: off               # internal API
+  no-server-example.com: off      # localhost is the documented dev server
+  operation-4xx-response: off     # health/readiness have no client errors

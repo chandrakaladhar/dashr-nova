@@ -19,6 +19,12 @@ jobs:
       - name: Install dependencies
         run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
+      - name: Specs (structure, IDs, traceability)
+        run: npm run spec:check
+
+      - name: OpenAPI contract
+        run: npm run spec:api
+
       - name: Type-check
         run: npm run typecheck
 
@@ -36,9 +42,18 @@ jobs:
 
       - name: Chart refuses to install without a database
         run: |
-          if helm template ci charts/dashr-nova --set image.tag=ci --set temporal.enabled=false --set opa.enabled=false 2>/dev/null; then
+          if out=$(helm template ci charts/dashr-nova --set image.tag=ci --set env.APP_ENV=ci --set temporal.enabled=false --set opa.enabled=false 2>&1); then
             echo "expected the chart to fail without database settings"; exit 1
           fi
+          echo "$out" | grep -q -e "PostgreSQL is not configured" -e "at '/database'" || { echo "failed for another reason:"; echo "$out"; exit 1; }
+
+      # REQ-AUTHZ-002: no default environment, so dev identities are never on by accident
+      - name: Chart refuses to install without APP_ENV
+        run: |
+          if out=$(helm template ci charts/dashr-nova --set image.tag=ci --set database.url=postgresql://x@db/x --set temporal.enabled=false --set opa.enabled=false 2>&1); then
+            echo "expected the chart to fail without env.APP_ENV"; exit 1
+          fi
+          echo "$out" | grep -q "env.APP_ENV is required" || { echo "failed for another reason:"; echo "$out"; exit 1; }
 
       - name: Build image
         run: |

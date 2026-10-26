@@ -21,7 +21,9 @@ export default async function Home() {
   return (
     <main className="shell">
       <h1>DASHR Nova</h1>
-      <p className="lede">The deployment is running. Replace this page with the dashboard.</p>
+      <p className="lede">
+        The deployment is running. <a href="/projects">Projects</a>
+      </p>
       <dl className="facts">
         <dt>Version</dt>
         <dd>{config.APP_VERSION}</dd>

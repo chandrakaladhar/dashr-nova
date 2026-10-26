@@ -1,0 +1,9 @@
+# Codex project settings (read only by Codex in a trusted checkout).
+# Same MCP servers Claude Code gets from its plugins in .claude/settings.json.
+
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp"
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["@playwright/mcp@latest"]
